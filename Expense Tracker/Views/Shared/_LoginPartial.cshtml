@@ -1,0 +1,36 @@
+﻿@using Expense_Tracker.Areas.Identity.Data;
+@using Microsoft.AspNetCore.Identity
+@using Expense_Tracker.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <br/>
+        <a id="manage" class="btn btn-success" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Manage Account</a>
+        <br />
+    <li class="nav-item">
+        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button id="logout" type="submit" class=" btn btn-success ">Logout</button>
+        </form>
+    </li>
+        <br />
+        
+        /*<a class="btn btn-success" asp-area="Admin" asp-controller="AdminHome" asp-action="CreateRole">Create Roles</a>*/
+
+}
+else
+{
+ <ul class="nav justify-content-center" style="margin-top:50px;">
+  <li class="nav-item">
+    <a class="btn btn-success mr-3" id="register" asp-area="Identity" asp-page="/Account/Register" style="margin-right: 1rem;">Register</a>
+  </li>
+  <li class="nav-item">
+    <a class="btn btn-success" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+  </li>
+</ul>
+
+}
+</ul>
