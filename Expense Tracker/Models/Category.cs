@@ -17,7 +17,7 @@ namespace Expense_Tracker.Models
 
         [Column(TypeName = "nvarchar(10)")]
         public string Type { get; set; } = "Expense";
-
+        public string UserId { get; set; }
         [NotMapped]
         public string? TitleWithIcon
         {

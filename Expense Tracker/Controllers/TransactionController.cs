@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Expense_Tracker.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Expense_Tracker.Controllers
 {
@@ -23,7 +24,11 @@ namespace Expense_Tracker.Controllers
         // GET: Transaction
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Transactions.Include(t => t.Category);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var applicationDbContext = _context.Transactions
+                .Where(t => t.UserId == userId)
+                .Include(t => t.Category);
+
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -42,10 +47,13 @@ namespace Expense_Tracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddOrEdit([Bind("TransactionId,CategoryId,Amount,Note,Date")] Transaction transaction)
+        public async Task<IActionResult> AddOrEdit([Bind("TransactionId,CategoryId,Amount,Note,Date,UserId")] Transaction transaction)
         {
             if (ModelState.IsValid)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                transaction.UserId = userId;
+
                 if (transaction.TransactionId == 0)
                     _context.Add(transaction);
                 else
@@ -80,7 +88,10 @@ namespace Expense_Tracker.Controllers
         [NonAction]
         public void PopulateCategories()
         {
-            var CategoryCollection = _context.Categories.ToList();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var CategoryCollection = _context.Categories
+        .Where(c => c.UserId == userId)
+        .ToList();
             Category DefaultCategory = new Category() { CategoryId = 0, Title = "Choose a Category" };
             CategoryCollection.Insert(0, DefaultCategory);
             ViewBag.Categories = CategoryCollection;

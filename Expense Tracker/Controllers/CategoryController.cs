@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Expense_Tracker.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Expense_Tracker.Controllers
 {
@@ -23,10 +24,15 @@ namespace Expense_Tracker.Controllers
         // GET: Category
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Categories.ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var categories = await _context.Categories
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+
+            return View(categories);
         }
 
-      
+
 
         // GET: Category/AddOrEdit
         public IActionResult AddOrEdit(int id=0)
@@ -42,10 +48,12 @@ namespace Expense_Tracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddOrEdit([Bind("CategoryId,Title,Icon,Type")] Category category)
+        public async Task<IActionResult> AddOrEdit([Bind("CategoryId,Title,Icon,Type,UserId")] Category category)
         {
             if (ModelState.IsValid)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                category.UserId = userId;
                 if (category.CategoryId == 0)
                     _context.Add(category);
                 else
@@ -72,9 +80,16 @@ namespace Expense_Tracker.Controllers
             var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
+                var transactionsToRemove = _context.Transactions
+                    .Where(t => t.CategoryId == id)
+                    .ToList();
+                foreach (var transaction in transactionsToRemove)
+                {
+                    _context.Transactions.Remove(transaction);
+                }
                 _context.Categories.Remove(category);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

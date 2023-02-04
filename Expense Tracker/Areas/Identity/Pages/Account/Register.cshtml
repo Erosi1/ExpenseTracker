@@ -43,12 +43,14 @@
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <div class="form-floating mb-1">
-                <p>Select Role:</p>
+                <p>
+                    Select Role:<br /><input asp-for="Input.SelectedRole" type="radio" value="Client" required /> Client <br />
+                    <span asp-validation-for="Input.SelectedRole" class="text-danger"></span>
+                </p>
                 @*<input asp-for="Input.SelectedRole" type="radio" value="Admin" /> Admin<br />
-                <span asp-validation-for="Input.SelectedRole" class="text-danger"></span>*@ 
+                <span asp-validation-for="Input.SelectedRole" class="text-danger"></span>*@
 
-                <input asp-for="Input.SelectedRole" type="radio" value="Client" /> Client <br />
-                <span asp-validation-for="Input.SelectedRole" class="text-danger"></span>
+             
 
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-success">Register</button>

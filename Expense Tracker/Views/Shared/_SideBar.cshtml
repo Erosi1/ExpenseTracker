@@ -6,49 +6,64 @@
 *@
 @{
     @inject UserManager<ApplicationUser> UserManager
-   
-    List<Object> menuItems = new List<Object>();
+    @inject SignInManager<ApplicationUser> SignInManager
 
-    menuItems.Add(new
+    List<Object> menuItemsC = new List<Object>();
+    List<Object> menuItemsA = new List<Object>();
+
+    menuItemsC.Add(new
     {
         text = "General",
         separator = true,
     });
-    menuItems.Add(new
+    menuItemsC.Add(new
     {
         text = "Dashboard",
         url = "/Dashboard",
         iconCss = "fa-solid fa-box",
     });
-    menuItems.Add(new
+    menuItemsC.Add(new
     {
         text = "Categories",
         url = "/Category",
         iconCss = "fa-solid fa-folder-closed",
     });
-    menuItems.Add(new
+    menuItemsC.Add(new
     {
         text = "Transactions",
         iconCss = "fa-solid fa-arrow-right-arrow-left",
         url = "/Transaction"
     });
 
-    menuItems.Add(new
+    menuItemsC.Add(new
     {
         text = "Extras",
         separator = true,
     });
-    menuItems.Add(new
+    menuItemsC.Add(new
     {
         text = "Reports",
         iconCss = "fa-solid fa-chart-simple",
         url = "#"
-    }); menuItems.Add(new
+    }); menuItemsC.Add(new
     {
         text = "Settings",
         iconCss = "fa-solid fa-gear",
         url = "#"
     });
+    menuItemsA.Add(new
+    {
+        text = "Create Role",
+        url = "/admin/adminhome",
+        iconCss = "fa-solid fa-plus-circle",
+    });
+    menuItemsA.Add(new
+    {
+        text = "Dashboard",
+        url = "/coreAdmin",
+        iconCss = "fa-solid fa-table-columns",
+    });
+
 }
 
 
@@ -60,25 +75,42 @@
             <div class="app-logo">
                 <img src="~/logo.png" />
             </div>
-            
+
         </div>
 
         <div class="profile-wrapper">
             <img class="profile-pic" src="~/profile.jpg" />
             <div class="titles d-flex flex-column ps-3">
-                <h6 class="mb-0"style="color:green">Expense Tracker</h6>
-                <span class="text-muted"style="color:">@UserManager.GetUserName(User)</span>
+                <h6 class="mb-0" style="color:green">Expense Tracker</h6>
+                <span class="text-muted" style="color:">@UserManager.GetUserName(User)</span>
             </div>
         </div>
 
-        <ejs-menu id="menu"
-                  items="menuItems"
+        @if (SignInManager.IsSignedIn(User))
+        {
+            var user = await UserManager.GetUserAsync(User);
+            if (await UserManager.IsInRoleAsync(user, "Client"))
+            {
+                // Render the ejs-menu component only for users with the role "Client"
+                <ejs-menu id="menu"
+                  items="menuItemsC"
                   orientation="Vertical"
                   hamburgerMode></ejs-menu>
-        <div class="w-100"><i id="sidebar-toggler" class="fa-solid"></i></div>
-        <br/>
-        
-        
+            }
+            else if (await UserManager.IsInRoleAsync(user, "Admin"))
+            {
+                // Render the ejs-menu component only for users with the role "Admin"
+                <ejs-menu id="menu"
+                  items="menuItemsA"
+                  orientation="Vertical"
+                  hamburgerMode></ejs-menu>
+            }
+
+            <div class="w-100"><i id="sidebar-toggler" class="fa-solid"></i></div>
+            <br />
+        }
+       
+
     </e-content-template>
 </ejs-sidebar>
 

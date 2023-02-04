@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Security.Claims;
 
 namespace Expense_Tracker.Controllers
 {
@@ -18,15 +19,14 @@ namespace Expense_Tracker.Controllers
         }
 
         public async Task<ActionResult> Index()
-        {
-            //Last 7 Days
+        {//Last 7 Days
             DateTime StartDate = DateTime.Today.AddDays(-6);
             DateTime EndDate = DateTime.Today;
-
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);  // get userId from ClaimsPrincipal
             List<Transaction> SelectedTransactions = await _context.Transactions
-                .Include(x => x.Category)
-                .Where(y => y.Date >= StartDate && y.Date <= EndDate)
-                .ToListAsync();
+                   .Include(x => x.Category)
+                   .Where(y => y.UserId == userId && y.Date >= StartDate && y.Date <= EndDate)
+                   .ToListAsync();
 
             //Total Income
             int TotalIncome = SelectedTransactions
@@ -100,12 +100,13 @@ namespace Expense_Tracker.Controllers
                                           expense = expense == null ? 0 : expense.expense,
                                       };
             //Recent Transactions
+          
             ViewBag.RecentTransactions = await _context.Transactions
                 .Include(i => i.Category)
+                .Where(t => t.UserId == userId)
                 .OrderByDescending(j => j.Date)
                 .Take(5)
                 .ToListAsync();
-
 
             return View();
         }
